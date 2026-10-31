@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}KidneyStone Care Center — AI Ultrasound Stone Detection{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="pill"><i></i> ASGCN-EffNetV2 model · 99.15% test accuracy</span>
+      <h1>Spot kidney stones in <em>seconds</em>, straight from the ultrasound.</h1>
+      <p class="lead">Upload a kidney ultrasound and our adaptive graph neural network flags whether a stone is present, with a clear confidence score for every prediction.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Start prediction →</a>
+        <a href="{{ url_for('about') }}" class="btn btn-ghost btn-lg">How it works</a>
+      </div>
+    </div>
+
+    <!-- Illustrative ultrasound sector scan -->
+    <div class="scan-wrap" aria-hidden="true">
+      <svg viewBox="0 0 520 520" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="tissue" cx="50%" cy="8%" r="95%">
+            <stop offset="0" stop-color="#3b556f"/><stop offset=".45" stop-color="#1c2e44"/><stop offset="1" stop-color="#050b14"/>
+          </radialGradient>
+          <radialGradient id="stone" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#f8fbff"/><stop offset=".55" stop-color="#cfe0f3"/><stop offset="1" stop-color="#cfe0f3" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="shadow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000" stop-opacity=".85"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#38bdf8" stop-opacity=".0"/><stop offset=".5" stop-color="#38bdf8" stop-opacity=".35"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="speckle" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/>
+            <feColorMatrix values="0 0 0 0 .75  0 0 0 0 .85  0 0 0 0 1  0 0 0 1.1 -.42"/>
+          </filter>
+          <clipPath id="fan"><path d="M260 40 L-60 560 L580 560 Z"/></clipPath>
+        </defs>
+        <rect width="520" height="520" fill="#02060d"/>
+        <g clip-path="url(#fan)">
+          <rect width="520" height="520" fill="url(#tissue)"/>
+          <!-- renal outline -->
+          <ellipse cx="260" cy="290" rx="120" ry="165" fill="none" stroke="#6f90b3" stroke-opacity=".35" stroke-width="10"/>
+          <ellipse cx="260" cy="290" rx="52" ry="92" fill="#08121f" fill-opacity=".8"/>
+          <!-- stone + acoustic shadow -->
+          <path d="M238 318 L282 318 L318 560 L202 560 Z" fill="url(#shadow)"/>
+          <circle cx="260" cy="312" r="17" fill="url(#stone)"/>
+          <circle cx="260" cy="312" r="30" fill="none" stroke="#f87171" stroke-width="1.6" stroke-dasharray="5 4"/>
+          <rect width="520" height="520" filter="url(#speckle)" opacity=".55"/>
+          <g class="sweep"><path d="M260 40 L240 560 L280 560 Z" fill="url(#beam)"/></g>
+        </g>
+        <path d="M260 40 L-60 560" stroke="#38bdf8" stroke-opacity=".18"/><path d="M260 40 L580 560" stroke="#38bdf8" stroke-opacity=".18"/>
+      </svg>
+      <div class="scan-hud"><span>Renal · Long axis</span><span>Depth 12 cm</span></div>
+      <div class="scan-result">Analysis: <b>Stone detected</b> · illustrative</div>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="margin-bottom:1rem">
+  <div class="stats">
+    <div class="stat"><b>99.15<span>%</span></b><small>Accuracy on held-out test set</small></div>
+    <div class="stat"><b>9,416</b><small>Ultrasound images in dataset</small></div>
+    <div class="stat"><b>4</b><small>Architectures benchmarked</small></div>
+    <div class="stat"><b>+1.84<span>pp</span></b><small>Gain over best baseline</small></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">How it works</span>
+      <h2>From scan to result in three steps</h2>
+      <p class="muted">No setup, no specialist software. Create an account and you are one upload away from a prediction.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card step">
+        <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+        <span class="num">STEP 01</span><h3>Upload the ultrasound</h3>
+        <p>Drag in a JPG or PNG kidney ultrasound. The image is processed in memory and is not stored.</p>
+      </div>
+      <div class="card step">
+        <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7l3 9M16 7l-3 9M8.5 6h7"/></svg></div>
+        <span class="num">STEP 02</span><h3>The graph network reads it</h3>
+        <p>EfficientNetV2 extracts patch features, then a similarity graph links related regions of the kidney.</p>
+      </div>
+      <div class="card step">
+        <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
+        <span class="num">STEP 03</span><h3>Get a clear verdict</h3>
+        <p>See Stone or Normal alongside the probability of each class, so you know how certain the model is.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="card spot">
+      <div>
+        <span class="eyebrow">Powered by</span>
+        <h2 style="font-size:2.2rem;margin:.6rem 0 .9rem">ASGCN-EffNetV2</h2>
+        <p class="muted">An Adaptive Similarity Graph Convolutional Network on an EfficientNetV2-S backbone. It outperformed Vision Transformer, MobileNetV3 + GCN and InceptionNeXt + GCN on every metric.</p>
+        <ul>
+          <li>Adaptive k-NN graph built from cosine similarity of patch features</li>
+          <li>Residual GCN blocks to avoid over-smoothing</li>
+          <li>Cross-attention fusion of local and graph-level features</li>
+        </ul>
+      </div>
+      <div class="leader">
+        <div class="leader-row"><span>ASGCN-EffNetV2</span><div class="bar"><i style="width:99.15%"></i></div><b>99.15%</b></div>
+        <div class="leader-row"><span>MobileNetV3-GCN</span><div class="bar"><i class="dim" style="width:97.31%"></i></div><b>97.31%</b></div>
+        <div class="leader-row"><span>InceptionNeXt-GCN</span><div class="bar"><i class="dim" style="width:97.17%"></i></div><b>97.17%</b></div>
+        <div class="leader-row"><span>ViT-B/16</span><div class="bar"><i class="dim" style="width:81.74%"></i></div><b>81.74%</b></div>
+        <small style="color:var(--faint);margin-top:.4rem">Test-set accuracy · 1,413 unseen images</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <div class="disclaimer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>
+    <span>This tool is a research prototype for decision support. Results must be reviewed by a qualified clinician and should never be used as the sole basis for diagnosis or treatment.</span>
+  </div>
+</section>
+{% endblock %}

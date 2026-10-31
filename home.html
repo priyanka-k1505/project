@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — KidneyStone Care Center{% endblock %}
+{% block content %}
+<section class="container page-head">
+  <div class="welcome">
+    <div>
+      <span class="eyebrow">Dashboard</span>
+      <h1>Welcome, {{ session['user_name'].split(' ')[0] }}</h1>
+      <p>Run a detection on a new ultrasound or review how each model performed on the held-out test set.</p>
+    </div>
+    <div class="card model-badge">
+      <small>Active model</small>
+      <b>ASGCN-EffNetV2</b>
+      <span class="acc">● 99.15% test accuracy</span>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <div class="grid-2">
+    <a class="card dash-card" href="{{ url_for('classification') }}">
+      <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-4.3-4.3M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM11 8v6M8 11h6"/></svg></div>
+      <h3>Detect kidney stones</h3>
+      <p>Upload an ultrasound and get a Stone / Normal prediction with class probabilities.</p>
+      <span class="go">Open detection →</span>
+    </a>
+    <a class="card dash-card" href="{{ url_for('performance') }}">
+      <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+      <h3>Model performance</h3>
+      <p>Accuracy, precision, recall and F1 for all four models, plus the confusion matrix.</p>
+      <span class="go">View metrics →</span>
+    </a>
+  </div>
+
+  <div class="grid-3" style="margin-top:1.25rem">
+    <div class="card"><span class="eyebrow">Precision</span><div style="font:600 2rem var(--display);margin-top:.3rem">99.15%</div><small class="muted">Test set, weighted</small></div>
+    <div class="card"><span class="eyebrow">Recall</span><div style="font:600 2rem var(--display);margin-top:.3rem">99.15%</div><small class="muted">Test set, weighted</small></div>
+    <div class="card"><span class="eyebrow">F1-score</span><div style="font:600 2rem var(--display);margin-top:.3rem">99.15%</div><small class="muted">Test set, weighted</small></div>
+  </div>
+</section>
+{% endblock %}

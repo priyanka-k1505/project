@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Model Performance — KidneyStone Care Center{% endblock %}
+{% block content %}
+<section class="container page-head">
+  <span class="eyebrow">Evaluation · held-out test set</span>
+  <h1>Model performance</h1>
+  <p>All figures are computed on 1,413 test images that were never used for training or checkpoint selection.</p>
+</section>
+
+<section class="container">
+
+  <div class="tabs" id="tabs" role="tablist"></div>
+
+  <div class="detail">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+        <div>
+          <h2 id="m-name" style="font-size:1.9rem"></h2>
+          <p class="muted" id="m-desc" style="margin-top:.5rem;max-width:560px;font-size:.95rem"></p>
+        </div>
+        <span class="tag" id="m-tag" style="display:none">Deployed</span>
+      </div>
+      <div class="metrics">
+        <div class="metric"><small>Accuracy</small><b id="m-acc" class="mono"></b></div>
+        <div class="metric"><small>Precision</small><b id="m-prec" class="mono"></b></div>
+        <div class="metric"><small>Recall</small><b id="m-rec" class="mono"></b></div>
+        <div class="metric"><small>F1-score</small><b id="m-f1" class="mono"></b></div>
+      </div>
+      <small class="muted">Best validation accuracy (checkpoint selection): <b id="m-val" style="color:var(--text)"></b> · Metrics are weighted averages.</small>
+    </div>
+
+    <div class="card">
+      <span class="eyebrow">Confusion matrix</span>
+      <div id="cm-box"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem">
+    <span class="eyebrow">Side-by-side</span>
+    <h3 style="font-size:1.5rem;margin:.4rem 0 1.4rem">Accuracy &amp; F1 across models</h3>
+    <div class="legend"><span><i style="background:var(--accent)"></i>Accuracy</span><span><i style="background:#7c9cc4"></i>F1-score</span></div>
+    <div class="chart" id="chart"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:1.5rem;margin-bottom:1rem">Full comparison</h3>
+    <div class="table-scroll">
+      <table class="cmp">
+        <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-score</th><th>Val. acc.</th></tr></thead>
+        <tbody id="table"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* All numbers come straight from the notebook's test-set evaluation. */
+const MODELS = [
+  { id:'asgcn', name:'ASGCN-EffNetV2', best:true, acc:99.15, prec:99.15, rec:99.15, f1:99.15, val:98.51,
+    desc:'Adaptive k-NN similarity graph on an EfficientNetV2-S backbone, with residual GCN blocks and cross-attention fusion. The model used for predictions on this site.',
+    cm:{ labels:['Normal','Stone'], m:[[655,7],[5,746]] } },
+  { id:'mobilenet', name:'MobileNetV3 + GCN', acc:97.31, prec:97.37, rec:97.31, f1:97.31, val:96.81,
+    desc:'Lightweight MobileNetV3-Small features fed to a single GCN layer over a static fully-connected patch graph.' },
+  { id:'inception', name:'InceptionNeXt + GCN', acc:97.17, prec:97.18, rec:97.17, f1:97.17, val:96.95,
+    desc:'InceptionNeXt-Tiny backbone with one GCN layer over a static fully-connected patch graph.' },
+  { id:'vit', name:'Vision Transformer', acc:81.74, prec:82.11, rec:81.74, f1:81.76, val:81.44,
+    desc:'ViT-B/16 with only the last encoder block and classification head fine-tuned (6 epochs).' }
+];
+const f = v => v.toFixed(2) + '%';
+
+/* tabs */
+const tabs = document.getElementById('tabs');
+MODELS.forEach((m,i) => {
+  const b = document.createElement('button');
+  b.className = 'tab' + (i === 0 ? ' active' : ''); b.role = 'tab';
+  b.innerHTML = m.name + (m.best ? ' <span class="tag">Best</span>' : '');
+  b.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); b.classList.add('active'); show(m); });
+  tabs.appendChild(b);
+});
+
+function cmHTML(m){
+  const [[tn,fp],[fn,tp]] = m.cm.m;
+  const tot = tn+fp+fn+tp;
+  const cell = (v,good) => `<div class="cell" style="background:${good ? 'rgba(56,189,248,'+(0.25+0.6*v/Math.max(tn,tp))+')' : 'rgba(248,113,113,.18)'};color:${good?'#e8f6ff':'#fca5a5'}">${v}<small>${(100*v/tot).toFixed(1)}%</small></div>`;
+  return `<div class="cm">
+    <div></div><div class="h">Pred. Normal</div><div class="h">Pred. Stone</div>
+    <div class="h">True<br>Normal</div>${cell(tn,true)}${cell(fp,false)}
+    <div class="h">True<br>Stone</div>${cell(fn,false)}${cell(tp,true)}
+  </div>
+  <p class="cm-note">${fn+fp} of ${tot} test images misclassified (${fp} false positives, ${fn} false negatives).</p>`;
+}
+
+function show(m){
+  document.getElementById('m-name').textContent = m.name;
+  document.getElementById('m-desc').textContent = m.desc;
+  document.getElementById('m-tag').style.display = m.best ? 'inline-block' : 'none';
+  document.getElementById('m-acc').textContent = f(m.acc);
+  document.getElementById('m-prec').textContent = f(m.prec);
+  document.getElementById('m-rec').textContent = f(m.rec);
+  document.getElementById('m-f1').textContent = f(m.f1);
+  document.getElementById('m-val').textContent = f(m.val);
+  document.getElementById('cm-box').innerHTML = m.cm ? cmHTML(m)
+    : '<div class="cm-na">Confusion matrix is shown for the deployed model.<br>Select <b>ASGCN-EffNetV2</b> to view it.</div>';
+}
+
+/* chart + table */
+const lo = 75, span = 100 - lo;
+document.getElementById('chart').innerHTML = MODELS.map(m => `
+  <div class="chart-row"><span>${m.name}</span>
+    <div class="bars">
+      <div class="bar"><i style="width:${(m.acc-lo)/span*100}%;${m.best?'':'background:#3b6a94'}"></i></div>
+      <div class="bar"><i style="width:${(m.f1-lo)/span*100}%;background:${m.best?'#7c9cc4':'#46566f'}"></i></div>
+    </div>
+  </div>`).join('') + '<small style="color:var(--faint)">Bars start at 75% to make differences visible.</small>';
+
+document.getElementById('table').innerHTML = MODELS.map(m => `
+  <tr class="${m.best?'best':''}"><td><b>${m.name}</b>${m.best?' <span class="tag" style="margin-left:.4rem">Best</span>':''}</td>
+  <td>${f(m.acc)}</td><td>${f(m.prec)}</td><td>${f(m.rec)}</td><td>${f(m.f1)}</td><td>${f(m.val)}</td></tr>`).join('');
+
+show(MODELS[0]);
+</script>
+{% endblock %}

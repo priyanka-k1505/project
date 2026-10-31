@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KidneyStone Care Center{% endblock %}</title>
+    <meta name="description" content="{% block description %}AI-assisted kidney stone detection from ultrasound images.{% endblock %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+{% set ep = request.endpoint %}
+<header class="site-header">
+    <nav>
+        <a class="brand" href="{{ url_for('home') if session.get('user_name') else url_for('index') }}">
+            <span class="brand-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#04121f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>
+            </span>
+            KidneyStone Care
+        </a>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+        <div class="nav-right" id="nav-right">
+            {% if session.get('user_name') %}
+            <ul class="nav-links">
+                <li><a href="{{ url_for('home') }}" class="{{ 'active' if ep == 'home' }}">Home</a></li>
+                <li><a href="{{ url_for('performance') }}" class="{{ 'active' if ep == 'performance' }}">Models</a></li>
+                <li><a href="{{ url_for('classification') }}" class="{{ 'active' if ep == 'classification' }}">Predict</a></li>
+                
+            </ul>
+            <div class="nav-cta">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+            {% else %}
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}" class="{{ 'active' if ep == 'index' }}">Home</a></li>
+                <li><a href="{{ url_for('about') }}" class="{{ 'active' if ep == 'about' }}">About</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a href="{{ url_for('login') }}" class="btn btn-ghost">Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+</header>
+
+<main>{% block content %}{% endblock %}</main>
+
+{% block footer %}
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#04121f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></span>KidneyStone Care</a>
+                <p>Deep-learning assisted detection of kidney stones in ultrasound images, built to support — never replace — clinical judgement.</p>
+            </div>
+            <div>
+                <h4>Explore</h4>
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('about') }}">About the project</a>
+                {% if session.get('user_name') %}
+                <a href="{{ url_for('classification') }}">Run a detection</a>
+                <a href="{{ url_for('performance') }}">Model performance</a>
+                {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Create account</a>
+                {% endif %}
+            </div>
+            <div>
+                <h4>Model</h4>
+                <a href="{{ url_for('about') }}">ASGCN-EffNetV2</a>
+                <span class="muted" style="font-size:.92rem;display:block">99.15% test accuracy</span>
+                <span class="muted" style="font-size:.92rem;display:block;margin-top:.4rem">Research prototype</span>
+            </div>
+        </div>
+        <div class="copyright">
+            <span>&copy; 2025 KidneyStone Care Center. All rights reserved.</span>
+            <span>Not a medical device. Not for standalone diagnosis.</span>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+<script>
+    const t = document.getElementById('menu-toggle'), n = document.getElementById('nav-right');
+    t.addEventListener('click', () => { const o = n.classList.toggle('open'); t.setAttribute('aria-expanded', o); });
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

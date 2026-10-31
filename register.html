@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Create account — KidneyStone Care Center{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<section class="auth">
+  <aside class="auth-aside">
+    <span class="eyebrow">Join the platform</span>
+    <h2>One account. Four models. Instant answers.</h2>
+    <ul>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>99.15% accuracy on an independent test set</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Images are analysed in memory and not stored</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Full metrics and confusion matrices on the performance page</li>
+    </ul>
+  </aside>
+
+  <div class="auth-main">
+    <div class="auth-card">
+      <h1>Create account</h1>
+      <p>It takes less than a minute.</p>
+
+      {% if message %}<div class="alert" role="alert">{{ message }}</div>{% endif %}
+
+      <form action="{{ url_for('register') }}" method="POST" id="reg-form">
+        <div class="field">
+          <label for="name">Full name</label>
+          <div class="input-wrap"><input type="text" id="name" name="name" required autocomplete="name" placeholder="Your full name"></div>
+        </div>
+        <div class="field">
+          <label for="email">Email address</label>
+          <div class="input-wrap"><input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com"></div>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters">
+            <button type="button" class="reveal" data-target="password">SHOW</button>
+          </div>
+          <div class="meter" id="meter"><i></i><i></i><i></i><i></i></div>
+          <div class="hint" id="strength-hint"></div>
+        </div>
+        <div class="field">
+          <label for="c_password">Confirm password</label>
+          <div class="input-wrap">
+            <input type="password" id="c_password" name="c_password" required minlength="6" autocomplete="new-password" placeholder="Re-enter your password">
+          </div>
+          <div class="hint" id="match-hint"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Create account</button>
+      </form>
+
+      <p class="auth-switch">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+const pw = document.getElementById('password'), cpw = document.getElementById('c_password');
+const bars = document.querySelectorAll('#meter i'), sh = document.getElementById('strength-hint'), mh = document.getElementById('match-hint');
+
+document.querySelectorAll('.reveal').forEach(b => b.addEventListener('click', () => {
+  const i = document.getElementById(b.dataset.target), show = i.type === 'password';
+  i.type = show ? 'text' : 'password'; b.textContent = show ? 'HIDE' : 'SHOW';
+}));
+
+function strength(v){
+  let s = 0;
+  if (v.length >= 6) s++;
+  if (v.length >= 10) s++;
+  if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
+  if (/\d/.test(v) && /[^A-Za-z0-9]/.test(v)) s++;
+  return s;
+}
+function checkStrength(){
+  const s = pw.value ? strength(pw.value) : 0;
+  const colors = ['#f87171','#fbbf24','#38bdf8','#34d399'];
+  const labels = ['Weak','Fair','Good','Strong'];
+  bars.forEach((b,i) => b.style.background = i < s ? colors[s-1] : '');
+  sh.textContent = pw.value ? labels[Math.max(s-1,0)] + ' password' : '';
+}
+function checkMatch(){
+  if (!cpw.value){ cpw.classList.remove('ok','err'); mh.textContent=''; return; }
+  const ok = cpw.value === pw.value;
+  cpw.classList.toggle('ok', ok); cpw.classList.toggle('err', !ok);
+  mh.textContent = ok ? 'Passwords match' : 'Passwords do not match';
+  mh.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+}
+pw.addEventListener('input', () => { checkStrength(); checkMatch(); });
+cpw.addEventListener('input', checkMatch);
+document.getElementById('reg-form').addEventListener('submit', e => {
+  if (pw.value !== cpw.value){ e.preventDefault(); checkMatch(); cpw.focus(); }
+});
+</script>
+{% endblock %}

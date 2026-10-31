@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Login — KidneyStone Care Center{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<section class="auth">
+  <aside class="auth-aside">
+    <span class="eyebrow">Patient portal</span>
+    <h2>Welcome back to faster, clearer scans.</h2>
+    <ul>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Run stone detection on any kidney ultrasound</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>See Stone vs Normal probabilities for each image</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Compare four deep-learning models side by side</li>
+    </ul>
+  </aside>
+
+  <div class="auth-main">
+    <div class="auth-card">
+      <h1>Log in</h1>
+      <p>Enter your credentials to continue.</p>
+
+      {% if message %}<div class="alert" role="alert">{{ message }}</div>{% endif %}
+
+      <form action="{{ url_for('login') }}" method="POST">
+        <div class="field">
+          <label for="email">Email address</label>
+          <div class="input-wrap"><input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com"></div>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
+            <button type="button" class="reveal" data-target="password">SHOW</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:.6rem">Log in</button>
+      </form>
+
+      <p class="auth-switch">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+      <p class="auth-switch" style="margin-top:.6rem"><a href="{{ url_for('index') }}" style="color:var(--faint);font-weight:500">← Back to home</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.reveal').forEach(b => b.addEventListener('click', () => {
+  const i = document.getElementById(b.dataset.target);
+  const show = i.type === 'password';
+  i.type = show ? 'text' : 'password';
+  b.textContent = show ? 'HIDE' : 'SHOW';
+}));
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}About — KidneyStone Care Center{% endblock %}
+{% block content %}
+<section class="container page-head">
+  <span class="eyebrow">About the project</span>
+  <h1>Comparing deep-learning models for kidney stone detection</h1>
+  <p>A study of four architectures on kidney ultrasound images, and the adaptive graph model that came out on top.</p>
+</section>
+
+<section class="container">
+  <div class="about-grid">
+    <div>
+      <p>This project compares deep-learning approaches for detecting kidney stones in ultrasound images: a <strong style="color:var(--text)">Vision Transformer (ViT-B/16)</strong>, <strong style="color:var(--text)">MobileNetV3 + GCN</strong>, <strong style="color:var(--text)">InceptionNeXt + GCN</strong>, and a new <strong style="color:var(--text)">Adaptive Similarity GCN with an EfficientNetV2 backbone (ASGCN-EffNetV2)</strong>.</p>
+      <p>The baseline GCN models connect every image patch to every other patch. ASGCN-EffNetV2 instead builds a k-nearest-neighbour graph from the cosine similarity of patch features, so related regions, such as a stone boundary and the tissue around it, are linked dynamically.</p>
+      <p>Models were trained on a stratified 70 / 15 / 15 split. Checkpoints were chosen on the validation set only, and every reported metric comes from a separate test set the models never saw during training.</p>
+      <div class="dataset" style="margin-top:1.8rem">
+        <div class="card" style="padding:1.2rem"><b style="font:600 1.6rem var(--display)">9,416</b><br><small class="muted">Total images</small></div>
+        <div class="card" style="padding:1.2rem"><b style="font:600 1.6rem var(--display)">5,002</b><br><small class="muted">Stone</small></div>
+        <div class="card" style="padding:1.2rem"><b style="font:600 1.6rem var(--display)">4,414</b><br><small class="muted">Normal</small></div>
+      </div>
+    </div>
+
+    <div>
+      <span class="eyebrow" style="display:block;margin-bottom:1rem">ASGCN-EffNetV2 pipeline</span>
+      <div class="pipeline">
+        <div class="node"><span class="n">1</span><div><b>Ultrasound image</b><small>Resize 256 → centre-crop 224 × 224, ImageNet normalisation</small></div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><span class="n">2</span><div><b>EfficientNetV2-S backbone</b><small>7 × 7 grid of 1,280-dim patch features</small></div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><span class="n">3</span><div><b>Adaptive k-NN similarity graph</b><small>Edges from cosine similarity, k = 8</small></div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><span class="n">4</span><div><b>2 × Residual GCN blocks</b><small>LayerNorm + GELU, 224 hidden units</small></div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><span class="n">5</span><div><b>Cross-attention fusion</b><small>Local CNN features × graph-level features</small></div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><span class="n">6</span><div><b>Classifier</b><small>Normal / Stone with softmax probabilities</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="margin-top:3rem">
+  <div class="disclaimer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>
+    <span>Research use only. Predictions are intended to assist healthcare professionals and are not a substitute for clinical diagnosis.</span>
+  </div>
+</section>
+{% endblock %}
